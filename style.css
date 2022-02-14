@@ -1,0 +1,137 @@
+* {
+    box-sizing: border-box;
+}
+
+html,
+body {
+    padding: 0;
+    margin: 0;
+}
+
+body {
+    font-family: BlinkMacSystemFont, -apple-system, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", "Helvetica", "Arial", sans-serif;
+}
+
+table {
+    min-width: 100vw;
+    /* width: auto; */
+    -webkit-box-flex: 1;
+    flex: 1;
+    display: grid;
+    border-collapse: collapse;
+    grid-template-columns: 206px 247px 148px;
+}
+
+thead,
+tbody,
+tr {
+    display: contents;
+}
+
+th,
+td {
+    padding: 15px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+th {
+    position: -webkit-sticky;
+    position: sticky;
+    top: 0;
+    background: #5cb85c;
+    text-align: left;
+    font-weight: normal;
+    font-size: 1.1rem;
+    color: white;
+    position: relative;
+}
+
+th:last-child {
+    border: 0;
+}
+
+.resize-handle {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    background: black;
+    opacity: 0;
+    width: 3px;
+    cursor: col-resize;
+}
+
+.resize-handle:hover,
+.header--being-resized .resize-handle {
+    opacity: 0.5;
+}
+
+th:hover .resize-handle {
+    opacity: 0.3;
+}
+
+td {
+    padding-top: 10px;
+    padding-bottom: 10px;
+    color: #808080;
+}
+
+tr:nth-child(even) td {
+    /* background: #f8f6ff; */
+}
+
+.clone-list {
+    /* border: 1px solid #ccc; */
+    border-top: 0px;
+    border-collapse: collapse;
+    grid-template-columns: 148px 153px 148px;
+}
+
+.table th,
+.table td {
+    border: 1px solid #ccc;
+}
+
+.table th,
+.table td {
+    padding: 0.5rem;
+}
+
+.draggable {
+    cursor: move;
+    user-select: none;
+}
+
+.placeholder {
+    background-color: #edf2f7;
+    border: 1px dashed #cbd5e0;
+    height: 38px;
+}
+
+.clone-list {
+    /* border-top: 1px solid #ccc; */
+}
+
+.clone-table {
+    grid-template-columns: 206px 247px 148px;
+}
+
+.clone-table th {
+    border: 1px solid #ccc;
+    border-top: none;
+    padding: 0.5rem;
+}
+
+.clone-table td {
+    border: 1px solid #ccc;
+    /* border-top: none; */
+    padding: 0.5rem;
+}
+
+.dragging {
+    background: #fff;
+    /* border-top: 1px solid #ccc; */
+    z-index: 999;
+}
