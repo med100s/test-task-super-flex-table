@@ -1,0 +1,384 @@
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <title>HTML DOM - Drag and drop table row</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" href="styles.css" class="style" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter&family=Source+Code+Pro&display=swap" />
+    <style>
+
+    </style>
+</head>
+
+<body>
+    <script>
+    </script>
+    <div style="padding: 4rem 0">
+        <table id="table" class="table">
+            <thead>
+                <tr>
+                    <th data-type="numeric">ID <span class="resize-handle"></span></th>
+                    <th data-type="text-short">First name <span class="resize-handle"></span></th>
+                    <th data-type="text-short">Last name <span class="resize-handle"></span></th>
+
+                </tr>
+            </thead>
+            <tbody id="data-table">
+
+
+            </tbody>
+        </table>
+    </div>
+
+
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <script>
+        function makeDraggable() {
+
+            const table = document.getElementById('table');
+
+            let draggingEle;
+            let draggingRowIndex;
+            let placeholder;
+            let list;
+            let isDraggingStarted = false;
+
+            // The current position of mouse relative to the dragging element
+            let x = 0;
+            let y = 0;
+
+            // Swap two nodes
+            const swap = function(nodeA, nodeB) {
+                const parentA = nodeA.parentNode;
+                const siblingA = nodeA.nextSibling === nodeB ? nodeA : nodeA.nextSibling;
+
+                // Move `nodeA` to before the `nodeB`
+                nodeB.parentNode.insertBefore(nodeA, nodeB);
+
+                // Move `nodeB` to before the sibling of `nodeA`
+                parentA.insertBefore(nodeB, siblingA);
+            };
+
+            // Check if `nodeA` is above `nodeB`
+            const isAbove = function(nodeA, nodeB) {
+                // Get the bounding rectangle of nodes
+                const rectA = nodeA.getBoundingClientRect();
+                const rectB = nodeB.getBoundingClientRect();
+
+                return rectA.top + rectA.height / 2 < rectB.top + rectB.height / 2;
+            };
+
+            const cloneTable = function() {
+                const rect = table.getBoundingClientRect();
+                const width = parseInt(window.getComputedStyle(table).width);
+
+                list = document.createElement('div');
+                var completeStyle = window.getComputedStyle(table, null).cssText;
+                list.classList.add('clone-list');
+                list.style.cssText = completeStyle;
+                list.style.cssText = `tr:nth-child(even) td {
+                                        background: #f8f6ff;
+                                      }`
+                list.style.position = 'absolute';
+                list.style.left = `${rect.left}px`;
+                list.style.top = `${rect.top -1}px`;
+                table.parentNode.insertBefore(list, table);
+
+                // Hide the original table
+                table.style.visibility = 'hidden';
+
+                table.querySelectorAll('tr').forEach(function(row) {
+                    // Create a new table from given row
+                    const item = document.createElement('div');
+                    item.classList.add('draggable');
+
+                    const newTable = document.createElement('table');
+                    newTable.setAttribute('class', 'clone-table');
+                    newTable.style.gridTemplateColumns = columns.
+                    map(({
+                        header,
+                        size
+                    }) => size).
+                    join(' ');
+                    newTable.style.width = `${width}px`;
+
+                    const newRow = document.createElement('tr');
+                    const cells = [].slice.call(row.children);
+                    cells.forEach(function(cell) {
+                        const newCell = cell.cloneNode(true);
+                        newCell.style.width = `${parseInt(window.getComputedStyle(cell).width)}px`;
+                        newRow.appendChild(newCell);
+                    });
+
+                    newTable.appendChild(newRow);
+                    item.appendChild(newTable);
+                    list.appendChild(item);
+                });
+            };
+
+            const mouseDownHandler = function(e) {
+                // Get the original row
+                const originalRow = e.target.parentNode;
+                draggingRowIndex = [].slice.call(table.querySelectorAll('tr')).indexOf(originalRow);
+
+                // Determine the mouse position
+                x = e.clientX;
+                y = e.clientY;
+
+                // Attach the listeners to `document`
+                document.addEventListener('mousemove', mouseMoveHandler);
+                document.addEventListener('mouseup', mouseUpHandler);
+            };
+
+
+            const mouseMoveHandler = function(e) {
+                if (!isDraggingStarted) {
+                    isDraggingStarted = true;
+
+                    cloneTable();
+
+                    draggingEle = [].slice.call(list.children)[draggingRowIndex];
+                    draggingEle.classList.add('dragging');
+
+                    // Let the placeholder take the height of dragging element
+                    // So the next element won't move up
+                    placeholder = document.createElement('div');
+                    placeholder.classList.add('placeholder');
+                    draggingEle.parentNode.insertBefore(placeholder, draggingEle.nextSibling);
+                    placeholder.style.height = `${draggingEle.offsetHeight}px`;
+                }
+
+                // Set position for dragging element
+                draggingEle.style.position = 'absolute';
+                draggingEle.style.top = `${draggingEle.offsetTop + e.clientY - y}px`;
+                draggingEle.style.left = `${draggingEle.offsetLeft + e.clientX - x}px`;
+
+                // Reassign the position of mouse
+                x = e.clientX;
+                y = e.clientY;
+
+                // The current order
+                // prevEle
+                // draggingEle
+                // placeholder
+                // nextEle
+                const prevEle = draggingEle.previousElementSibling;
+                const nextEle = placeholder.nextElementSibling;
+
+                // The dragging element is above the previous element
+                // User moves the dragging element to the top
+                // We don't allow to drop above the header
+                // (which doesn't have `previousElementSibling`)
+                if (prevEle && prevEle.previousElementSibling && isAbove(draggingEle, prevEle)) {
+                    // The current order    -> The new order
+                    // prevEle              -> placeholder
+                    // draggingEle          -> draggingEle
+                    // placeholder          -> prevEle
+                    swap(placeholder, draggingEle);
+                    swap(placeholder, prevEle);
+                    return;
+                }
+
+                // The dragging element is below the next element
+                // User moves the dragging element to the bottom
+                if (nextEle && isAbove(nextEle, draggingEle)) {
+                    // The current order    -> The new order
+                    // draggingEle          -> nextEle
+                    // placeholder          -> placeholder
+                    // nextEle              -> draggingEle
+                    swap(nextEle, placeholder);
+                    swap(nextEle, draggingEle);
+                }
+            };
+
+            const mouseUpHandler = function() {
+                // Remove the placeholder
+                placeholder && placeholder.parentNode.removeChild(placeholder);
+
+                draggingEle.classList.remove('dragging');
+                draggingEle.style.removeProperty('top');
+                draggingEle.style.removeProperty('left');
+                draggingEle.style.removeProperty('position');
+
+                // Get the end index
+                const endRowIndex = [].slice.call(list.children).indexOf(draggingEle);
+
+                isDraggingStarted = false;
+
+                // Remove the `list` element
+                list.parentNode.removeChild(list);
+
+                // Move the dragged row to `endRowIndex`
+                let rows = [].slice.call(table.querySelectorAll('tr'));
+                draggingRowIndex > endRowIndex ?
+                    rows[endRowIndex].parentNode.insertBefore(rows[draggingRowIndex], rows[endRowIndex]) :
+                    rows[endRowIndex].parentNode.insertBefore(
+                        rows[draggingRowIndex],
+                        rows[endRowIndex].nextSibling
+                    );
+
+                // Bring back the table
+                table.style.removeProperty('visibility');
+
+                // Remove the handlers of `mousemove` and `mouseup`
+                document.removeEventListener('mousemove', mouseMoveHandler);
+                document.removeEventListener('mouseup', mouseUpHandler);
+            };
+
+            table.querySelectorAll('tr').forEach(function(row, index) {
+                // Ignore the header
+                // We don't want user to change the order of header
+                if (index === 0) {
+                    return;
+                }
+
+                const firstCell = row.firstElementChild;
+                firstCell.classList.add('draggable');
+                firstCell.addEventListener('mousedown', mouseDownHandler);
+            });
+            //////////////////////////////////////////////////
+            const min = 150;
+            // The max (fr) values for grid-template-columns
+            const columnTypeToRatioMap = {
+                numeric: 1,
+                'text-short': 1.67,
+                'text-long': 3.33
+            };
+
+
+            // const table = document.querySelector('table');
+            const clone_Table = document.getElementsByClassName('clone-list')
+
+            const columns = [];
+            let headerBeingResized;
+
+            // The next three functions are mouse event callbacks
+
+            // Where the magic happens. I.e. when they're actually resizing
+            const onMouseMove = e => requestAnimationFrame(() => {
+                console.log('onMouseMove');
+
+
+                // Calculate the desired width
+                horizontalScrollOffset = document.documentElement.scrollLeft;
+                const width = horizontalScrollOffset + e.clientX - headerBeingResized.offsetLeft;
+
+                // Update the column object with the new size value
+                const column = columns.find(({
+                    header
+                }) => header === headerBeingResized);
+                column.size = Math.max(min, width) + 'px'; // Enforce our minimum
+
+                // console.log(column)
+
+                // For the other headers which don't have a set width, fix it to their computed width
+                columns.forEach(column => {
+                    if (column.size.startsWith('minmax')) { // isn't fixed yet (it would be a pixel value otherwise)
+                        column.size = parseInt(column.header.clientWidth, 10) + 'px';
+                    }
+                });
+
+                /* 
+                      Update the column sizes
+                      Reminder: grid-template-columns sets the width for all columns in one value
+                    */
+
+
+                table.style.gridTemplateColumns = columns.
+                map(({
+                    header,
+                    size
+                }) => size).
+                join(' ');
+                var sheet = (function() {
+                    // Create the <style> tag
+                    var style = document.createElement("style");
+
+                    // Add a media (and/or media query) here if you'd like!
+                    // style.setAttribute("media", "screen")
+                    // style.setAttribute("media", "only screen and (max-width : 1024px)")
+
+                    // WebKit hack :(
+                    style.appendChild(document.createTextNode(""));
+
+                    // Add the <style> element to the page
+                    document.head.appendChild(style);
+
+                    return style.sheet;
+                })();
+                sheet.insertRule(`.clone-list{grid-template-columns:${columns.map(({header,size}) => {console.log(size);size}).join(' ')};`, 0)
+
+                // clone_Table.style.gridTemplateColumns = columns.
+                // map(({
+                //     header,
+                //     size
+                // }) => size).
+                // join(' ');
+            });
+
+            // Clean up event listeners, classes, etc.
+            const onMouseUp = () => {
+                console.log('onMouseUp');
+
+
+                window.removeEventListener('mousemove', onMouseMove);
+                window.removeEventListener('mouseup', onMouseUp);
+                headerBeingResized.classList.remove('header--being-resized');
+                headerBeingResized = null;
+            };
+
+            // Get ready, they're about to resize
+            const initResize = ({
+                target
+            }) => {
+                console.log('initResize');
+
+                headerBeingResized = target.parentNode;
+                window.addEventListener('mousemove', onMouseMove);
+                window.addEventListener('mouseup', onMouseUp);
+                headerBeingResized.classList.add('header--being-resized');
+            };
+
+            // Let's populate that columns array and add listeners to the resize handles
+            document.querySelectorAll('th').forEach(header => {
+                const max = columnTypeToRatioMap[header.dataset.type] + 'fr';
+                columns.push({
+                    header,
+                    // The initial size value for grid-template-columns:
+                    size: `minmax(${min}px, ${max})`
+                });
+
+                header.querySelector('.resize-handle').addEventListener('mousedown', initResize);
+            });
+            console.log('draggable')
+        }
+
+        function insertData() {
+            var options = {
+                method: 'GET',
+                url: 'https://swapi.dev/api/people',
+                headers: {}
+            };
+            return axios.request(options).then(function(response) {
+                console.log(response.data.results)
+                el = response.data.results
+                let tableData = ''
+                for (var i = 0; i < 10; i++) {
+                    tableData += '<tr><td>' + i + "</td><td>" + el[i].name + "</td><td>" + el[i].hair_color + "</td></tr>";
+                }
+                document.getElementById("data-table").innerHTML += tableData
+                makeDraggable()
+                console.log('hello')
+            }).catch(function(error) {
+                console.error(error);
+            });
+        }
+        insertData()
+    </script>"
+
+    <button id="clonetable"></button>"
+</body>
+
+</html>
