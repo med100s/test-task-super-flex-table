@@ -15,18 +15,22 @@
 <body>
     <script>
     </script>
-    <div style="padding: 4rem 0">
+    <div>
         <table id="table" class="table">
-            <thead>
+            <thead style="position: absolute;">
                 <tr>
-                    <th data-type="numeric">ID <span class="resize-handle"></span></th>
-                    <th data-type="text-short">First name <span class="resize-handle"></span></th>
-                    <th data-type="text-short">Last name <span class="resize-handle"></span></th>
+                    <th onclick="sortTable(0)" data-type="numeric">ID <span class="resize-handle"></span></th>
+                    <th onclick="sortTable(1)" data-type="text-short">First name <span class="resize-handle"></span></th>
+                    <th onclick="sortTable(1)" data-type="text-short">Last name <span class="resize-handle"></span></th>
 
                 </tr>
             </thead>
             <tbody id="data-table">
-
+                <tr>
+                    <td>you dint get any data yet</td>
+                    <td>you dint get any data yet</td>
+                    <td>you dint get any data yet</td>
+                </tr>
 
             </tbody>
         </table>
@@ -81,9 +85,10 @@
                 list.style.cssText = `tr:nth-child(even) td {
                                         background: #f8f6ff;
                                       }`
+                    // list.style.border = '1px'
                 list.style.position = 'absolute';
                 list.style.left = `${rect.left}px`;
-                list.style.top = `${rect.top -1}px`;
+                list.style.top = `${rect.top+1}px`;
                 table.parentNode.insertBefore(list, table);
 
                 // Hide the original table
@@ -96,12 +101,15 @@
 
                     const newTable = document.createElement('table');
                     newTable.setAttribute('class', 'clone-table');
+                    let moved = 0
                     newTable.style.gridTemplateColumns = columns.
                     map(({
                         header,
                         size
                     }) => size).
                     join(' ');
+
+
                     newTable.style.width = `${width}px`;
 
                     const newRow = document.createElement('tr');
@@ -308,7 +316,6 @@
 
                     return style.sheet;
                 })();
-                sheet.insertRule(`.clone-list{grid-template-columns:${columns.map(({header,size}) => {console.log(size);size}).join(' ')};`, 0)
 
                 // clone_Table.style.gridTemplateColumns = columns.
                 // map(({
@@ -355,19 +362,33 @@
             console.log('draggable')
         }
 
+        function removeAllChildren(theParent) {
+
+            // Create the Range object
+            var rangeObj = new Range();
+
+            // Select all of theParent's children
+            rangeObj.selectNodeContents(theParent);
+
+            // Delete everything that is selected
+            rangeObj.deleteContents();
+        }
+
         function insertData() {
+            removeAllChildren(document.getElementById("data-table"))
             var options = {
                 method: 'GET',
                 url: 'https://swapi.dev/api/people',
                 headers: {}
             };
-            return axios.request(options).then(function(response) {
+            axios.request(options).then(function(response) {
                 console.log(response.data.results)
                 el = response.data.results
                 let tableData = ''
                 for (var i = 0; i < 10; i++) {
                     tableData += '<tr><td>' + i + "</td><td>" + el[i].name + "</td><td>" + el[i].hair_color + "</td></tr>";
                 }
+
                 document.getElementById("data-table").innerHTML += tableData
                 makeDraggable()
                 console.log('hello')
@@ -375,10 +396,66 @@
                 console.error(error);
             });
         }
-        insertData()
-    </script>"
 
-    <button id="clonetable"></button>"
+
+
+        function sortTable(n) {
+            var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
+            table = document.getElementById("table");
+            switching = true;
+            //Set the sorting direction to ascending:
+            dir = "asc";
+            /*Make a loop that will continue until
+            no switching has been done:*/
+            while (switching) {
+                //start by saying: no switching is done:
+                switching = false;
+                rows = table.rows;
+                /*Loop through all table rows (except the
+                first, which contains table headers):*/
+                for (i = 1; i < (rows.length - 1); i++) {
+                    //start by saying there should be no switching:
+                    shouldSwitch = false;
+                    /*Get the two elements you want to compare,
+                    one from current row and one from the next:*/
+                    x = rows[i].getElementsByTagName("TD")[n];
+                    y = rows[i + 1].getElementsByTagName("TD")[n];
+                    /*check if the two rows should switch place,
+                    based on the direction, asc or desc:*/
+                    if (dir == "asc") {
+                        if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
+                            //if so, mark as a switch and break the loop:
+                            shouldSwitch = true;
+                            break;
+                        }
+                    } else if (dir == "desc") {
+                        if (x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) {
+                            //if so, mark as a switch and break the loop:
+                            shouldSwitch = true;
+                            break;
+                        }
+                    }
+                }
+                if (shouldSwitch) {
+                    /*If a switch has been marked, make the switch
+                    and mark that a switch has been done:*/
+                    rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+                    switching = true;
+                    //Each time a switch is done, increase this count by 1:
+                    switchcount++;
+                } else {
+                    /*If no switching has been done AND the direction is "asc",
+                    set the direction to "desc" and run the while loop again.*/
+                    if (switchcount == 0 && dir == "asc") {
+                        dir = "desc";
+                        switching = true;
+                    }
+                }
+            }
+        }
+    </script>
+    <button onclick="insertData()">get</button>
+    <button onclick="removeAllChildren(document.getElementById('data-table'))">clear</button>
 </body>
 
 </html>
