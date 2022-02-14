@@ -19,7 +19,7 @@ table {
     flex: 1;
     display: grid;
     border-collapse: collapse;
-    grid-template-columns: 206px 247px 148px;
+    grid-template-columns: minmax(150px, 1fr) minmax(150px, 1.67fr) minmax(150px, 1.67fr);
 }
 
 thead,
@@ -86,7 +86,6 @@ tr:nth-child(even) td {
     /* border: 1px solid #ccc; */
     border-top: 0px;
     border-collapse: collapse;
-    grid-template-columns: 148px 153px 148px;
 }
 
 .table th,
@@ -114,9 +113,7 @@ tr:nth-child(even) td {
     /* border-top: 1px solid #ccc; */
 }
 
-.clone-table {
-    grid-template-columns: 206px 247px 148px;
-}
+.clone-table {}
 
 .clone-table th {
     border: 1px solid #ccc;
