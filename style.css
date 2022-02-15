@@ -19,7 +19,7 @@ table {
     flex: 1;
     display: grid;
     border-collapse: collapse;
-    grid-template-columns: minmax(150px, 1fr) minmax(150px, 1.67fr) minmax(150px, 1.67fr);
+    grid-template-columns: minmax(150px, 1fr) minmax(150px, 1.67fr) minmax(150px, 1.67fr) minmax(150px, 0.50fr);
 }
 
 thead,
