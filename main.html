@@ -19,9 +19,9 @@
         <table id="table" class="table">
             <thead style="position: absolute;">
                 <tr>
-                    <th onclick="sortTable(0)" data-type="numeric">ID <span class="resize-handle"></span></th>
-                    <th onclick="sortTable(1)" data-type="text-short">First name <span class="resize-handle"></span></th>
-                    <th onclick="sortTable(2)" data-type="text-short">Last name <span class="resize-handle"></span></th>
+                    <th onclick="sortTable(0)" data-type="numeric">No <span class="resize-handle"></span></th>
+                    <th onclick="sortTable(1)" data-type="text-short">name <span class="resize-handle"></span></th>
+                    <th onclick="sortTable(2)" data-type="text-short">hair color<span class="resize-handle"></span></th>
                     <th data-type="text-short">delete <span class="resize-handle"></span></th>
                 </tr>
             </thead>
@@ -43,6 +43,116 @@
         function makeDraggable() {
 
             const table = document.getElementById('table');
+
+            const min = 150;
+            // The max (fr) values for grid-template-columns
+            const columnTypeToRatioMap = {
+                numeric: 1,
+                'text-short': 1.67,
+                'text-long': 3.33
+            };
+
+
+            // const table = document.querySelector('table');
+            const clone_Table = document.getElementsByClassName('clone-list')
+
+            const columns = [];
+            let headerBeingResized;
+
+            // The next three functions are mouse event callbacks
+
+            // Where the magic happens. I.e. when they're actually resizing
+            const onMouseMove = e => requestAnimationFrame(() => {
+                console.log('onMouseMove');
+
+
+                // Calculate the desired width
+                horizontalScrollOffset = document.documentElement.scrollLeft;
+                const width = horizontalScrollOffset + e.clientX - headerBeingResized.offsetLeft;
+
+                // Update the column object with the new size value
+                const column = columns.find(({
+                    header
+                }) => header === headerBeingResized);
+                column.size = Math.max(min, width) + 'px'; // Enforce our minimum
+
+                // console.log(column)
+
+                // For the other headers which don't have a set width, fix it to their computed width
+                columns.forEach(column => {
+                    if (column.size.startsWith('minmax')) { // isn't fixed yet (it would be a pixel value otherwise)
+                        column.size = parseInt(column.header.clientWidth, 10) + 'px';
+                    }
+                });
+
+                /* 
+                      Update the column sizes
+                      Reminder: grid-template-columns sets the width for all columns in one value
+                    */
+
+                table.style.gridTemplateColumns = columns.
+                map(({
+                    header,
+                    size
+                }) => size).
+                join(' ');
+
+                var sheet = (function() {
+                    // Create the <style> tag
+                    var style = document.createElement("style");
+
+                    // Add a media (and/or media query) here if you'd like!
+                    // style.setAttribute("media", "screen")
+                    // style.setAttribute("media", "only screen and (max-width : 1024px)")
+
+                    // WebKit hack :(
+                    style.appendChild(document.createTextNode(""));
+
+                    // Add the <style> element to the page
+                    document.head.appendChild(style);
+
+                    return style.sheet;
+                })();
+
+            });
+
+            // Clean up event listeners, classes, etc.
+            const onMouseUp = () => {
+                console.log('onMouseUp');
+
+
+                window.removeEventListener('mousemove', onMouseMove);
+                window.removeEventListener('mouseup', onMouseUp);
+                headerBeingResized.classList.remove('header--being-resized');
+                headerBeingResized = null;
+            };
+
+            // Get ready, they're about to resize
+            const initResize = ({
+                target
+            }) => {
+                console.log('initResize');
+
+                headerBeingResized = target.parentNode;
+                window.addEventListener('mousemove', onMouseMove);
+                window.addEventListener('mouseup', onMouseUp);
+                headerBeingResized.classList.add('header--being-resized');
+            };
+
+            // Let's populate that columns array and add listeners to the resize handles
+            document.querySelectorAll('th').forEach(header => {
+                const max = columnTypeToRatioMap[header.dataset.type] + 'fr';
+                columns.push({
+                    header,
+                    // The initial size value for grid-template-columns:
+                    size: `minmax(${min}px, ${max})`
+                });
+
+                header.querySelector('.resize-handle').addEventListener('mousedown', initResize);
+            });
+            console.log('draggable')
+
+            // /////////////////////////////////////////////
 
             let draggingEle;
             let draggingRowIndex;
@@ -76,6 +186,16 @@
             };
 
             const cloneTable = function() {
+                table.style.gridTemplateColumns = columns.
+                map(({
+                    header,
+                    size
+                }) => size).
+                join(' ');
+                console.log(columns.map(({
+                    header,
+                    size
+                }) => size).join(' '))
                 const rect = table.getBoundingClientRect();
                 const width = parseInt(window.getComputedStyle(table).width);
 
@@ -248,119 +368,7 @@
                 firstCell.addEventListener('mousedown', mouseDownHandler);
             });
             //////////////////////////////////////////////////
-            const min = 150;
-            // The max (fr) values for grid-template-columns
-            const columnTypeToRatioMap = {
-                numeric: 1,
-                'text-short': 1.67,
-                'text-long': 3.33
-            };
 
-
-            // const table = document.querySelector('table');
-            const clone_Table = document.getElementsByClassName('clone-list')
-
-            const columns = [];
-            let headerBeingResized;
-
-            // The next three functions are mouse event callbacks
-
-            // Where the magic happens. I.e. when they're actually resizing
-            const onMouseMove = e => requestAnimationFrame(() => {
-                console.log('onMouseMove');
-
-
-                // Calculate the desired width
-                horizontalScrollOffset = document.documentElement.scrollLeft;
-                const width = horizontalScrollOffset + e.clientX - headerBeingResized.offsetLeft;
-
-                // Update the column object with the new size value
-                const column = columns.find(({
-                    header
-                }) => header === headerBeingResized);
-                column.size = Math.max(min, width) + 'px'; // Enforce our minimum
-
-                // console.log(column)
-
-                // For the other headers which don't have a set width, fix it to their computed width
-                columns.forEach(column => {
-                    if (column.size.startsWith('minmax')) { // isn't fixed yet (it would be a pixel value otherwise)
-                        column.size = parseInt(column.header.clientWidth, 10) + 'px';
-                    }
-                });
-
-                /* 
-                      Update the column sizes
-                      Reminder: grid-template-columns sets the width for all columns in one value
-                    */
-
-
-                table.style.gridTemplateColumns = columns.
-                map(({
-                    header,
-                    size
-                }) => size).
-                join(' ');
-                var sheet = (function() {
-                    // Create the <style> tag
-                    var style = document.createElement("style");
-
-                    // Add a media (and/or media query) here if you'd like!
-                    // style.setAttribute("media", "screen")
-                    // style.setAttribute("media", "only screen and (max-width : 1024px)")
-
-                    // WebKit hack :(
-                    style.appendChild(document.createTextNode(""));
-
-                    // Add the <style> element to the page
-                    document.head.appendChild(style);
-
-                    return style.sheet;
-                })();
-
-                // clone_Table.style.gridTemplateColumns = columns.
-                // map(({
-                //     header,
-                //     size
-                // }) => size).
-                // join(' ');
-            });
-
-            // Clean up event listeners, classes, etc.
-            const onMouseUp = () => {
-                console.log('onMouseUp');
-
-
-                window.removeEventListener('mousemove', onMouseMove);
-                window.removeEventListener('mouseup', onMouseUp);
-                headerBeingResized.classList.remove('header--being-resized');
-                headerBeingResized = null;
-            };
-
-            // Get ready, they're about to resize
-            const initResize = ({
-                target
-            }) => {
-                console.log('initResize');
-
-                headerBeingResized = target.parentNode;
-                window.addEventListener('mousemove', onMouseMove);
-                window.addEventListener('mouseup', onMouseUp);
-                headerBeingResized.classList.add('header--being-resized');
-            };
-
-            // Let's populate that columns array and add listeners to the resize handles
-            document.querySelectorAll('th').forEach(header => {
-                const max = columnTypeToRatioMap[header.dataset.type] + 'fr';
-                columns.push({
-                    header,
-                    // The initial size value for grid-template-columns:
-                    size: `minmax(${min}px, ${max})`
-                });
-
-                header.querySelector('.resize-handle').addEventListener('mousedown', initResize);
-            });
-            console.log('draggable')
         }
 
         function removeAllChildren(theParent) {
@@ -379,18 +387,35 @@
             let target = null
             let btn = document.createElement("button");
 
-            for (let i = 0; i < 10; i++) {
+            for (let i = 0; i < 5; i++) {
                 btn = document.createElement("button");
                 btn.innerHTML = "delete";
                 btn.type = "submit";
                 btn.name = "formBtn";
                 target = document.getElementById(`delete-button-${i}`)
-                btn.onclick = () => document.getElementById(`delete-row-${i}`).remove();
+                btn.addEventListener('click', () => document.getElementById(`delete-row-${i}`).remove(), true)
+                    // btn.onclick = () => document.getElementById(`delete-row-${i}`).remove();
                 target.appendChild(btn)
+                    // target.addEventListener('click', document.getElementById(`delete-row-${i}`).remove(), true)
+
             }
         }
+        var page
+        page = 0
 
-        function insertData() {
+        function nextPage() {
+            page += 5
+            console.log(page)
+            insertData(page)
+        }
+
+        function prevPage() {
+            page -= 5
+            console.log(page)
+            insertData(page)
+        }
+
+        function insertData(page) {
             removeAllChildren(document.getElementById("data-table"))
             var options = {
                 method: 'GET',
@@ -401,8 +426,10 @@
                 console.log(response.data.results)
                 el = response.data.results
                 let tableData = ''
-                for (var i = 0; i < 10; i++) {
-                    tableData += `<tr id="delete-row-${i}"><td>` + i + "</td><td>" + el[i].name + "</td><td>" + el[i].hair_color + `</td><td id="delete-button-${i}"></td></tr>`;
+                console.log(page, "page ")
+                for (let i = 0; i < 5; i++) {
+                    console.log(el[i + page].name)
+                    tableData += `<tr id="delete-row-${i}"><td>` + [i + page] + "</td><td>" + el[i + page].name + "</td><td>" + el[i + page].hair_color + `</td><td id="delete-button-${i}"></td></tr>`;
                 }
 
                 document.getElementById("data-table").innerHTML += tableData
@@ -488,10 +515,23 @@
             console.log(data)
             console.log(typeof(data))
             document.getElementById('data-table').innerHTML = data
+            makeDraggable()
+                // document.getElementsByClassName('clone-table').style.gridTemplateColumns = table.style.gridTemplateColumns
 
+
+            for (let i = 0; i < 5; i++) {
+                try {
+                    target = document.getElementById(`delete-button-${i}`)
+                    target.addEventListener('click', () => document.getElementById(`delete-row-${i}`).remove())
+                } catch {
+                    console.log(`delete-button-${i} doesnt exist`)
+                }
+            }
         }
     </script>
-    <button onclick="insertData()">get</button>
+    <button onclick="prevPage()">prev page</button>
+    <button onclick="insertData(page)">get</button>
+    <button onclick="nextPage()">next page</button>
     <button onclick="removeAllChildren(document.getElementById('data-table'))">clear</button>
     <button onclick="saveTableData()">save to localstorage</button>
     <button onclick="loadTableData()">load from localstorage</button>
