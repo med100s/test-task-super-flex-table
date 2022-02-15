@@ -21,12 +21,13 @@
                 <tr>
                     <th onclick="sortTable(0)" data-type="numeric">ID <span class="resize-handle"></span></th>
                     <th onclick="sortTable(1)" data-type="text-short">First name <span class="resize-handle"></span></th>
-                    <th onclick="sortTable(1)" data-type="text-short">Last name <span class="resize-handle"></span></th>
-
+                    <th onclick="sortTable(2)" data-type="text-short">Last name <span class="resize-handle"></span></th>
+                    <th data-type="text-short">delete <span class="resize-handle"></span></th>
                 </tr>
             </thead>
             <tbody id="data-table">
                 <tr>
+                    <td>you dint get any data yet</td>
                     <td>you dint get any data yet</td>
                     <td>you dint get any data yet</td>
                     <td>you dint get any data yet</td>
@@ -374,6 +375,21 @@
             rangeObj.deleteContents();
         }
 
+        function createButtons() {
+            let target = null
+            let btn = document.createElement("button");
+
+            for (let i = 0; i < 10; i++) {
+                btn = document.createElement("button");
+                btn.innerHTML = "delete";
+                btn.type = "submit";
+                btn.name = "formBtn";
+                target = document.getElementById(`delete-button-${i}`)
+                btn.onclick = () => document.getElementById(`delete-row-${i}`).remove();
+                target.appendChild(btn)
+            }
+        }
+
         function insertData() {
             removeAllChildren(document.getElementById("data-table"))
             var options = {
@@ -386,11 +402,12 @@
                 el = response.data.results
                 let tableData = ''
                 for (var i = 0; i < 10; i++) {
-                    tableData += '<tr><td>' + i + "</td><td>" + el[i].name + "</td><td>" + el[i].hair_color + "</td></tr>";
+                    tableData += `<tr id="delete-row-${i}"><td>` + i + "</td><td>" + el[i].name + "</td><td>" + el[i].hair_color + `</td><td id="delete-button-${i}"></td></tr>`;
                 }
 
                 document.getElementById("data-table").innerHTML += tableData
                 makeDraggable()
+                createButtons()
                 console.log('hello')
             }).catch(function(error) {
                 console.error(error);
@@ -453,9 +470,31 @@
                 }
             }
         }
+        let dataTable = []
+        let childrenElements = 0
+
+        function saveTableData() {
+            dataTable = document.getElementById('data-table');
+            childrenElements = dataTable.cloneNode(true);
+            let dataToSave = []
+            console.log(childrenElements.outerHTML)
+
+            localStorage.setItem('myCat', childrenElements.outerHTML);
+            // removeAllChildren(document.getElementById('data-table'))
+        }
+
+        function loadTableData() {
+            data = localStorage.getItem('myCat')
+            console.log(data)
+            console.log(typeof(data))
+            document.getElementById('data-table').innerHTML = data
+
+        }
     </script>
     <button onclick="insertData()">get</button>
     <button onclick="removeAllChildren(document.getElementById('data-table'))">clear</button>
+    <button onclick="saveTableData()">save to localstorage</button>
+    <button onclick="loadTableData()">load from localstorage</button>
 </body>
 
 </html>
