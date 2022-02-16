@@ -13,8 +13,6 @@
 </head>
 
 <body>
-    <script>
-    </script>
     <div>
         <table id="table" class="table">
             <thead style="position: absolute;">
@@ -37,6 +35,12 @@
         </table>
     </div>
 
+    <button class="blue-rounded-button" onclick="prevPage()">prev page</button>
+    <button class="blue-rounded-button" onclick="insertData(page)">get</button>
+    <button class="blue-rounded-button" onclick="nextPage()">next page</button>
+    <button class="blue-rounded-button" onclick="removeAllChildren(document.getElementById('data-table'))">clear</button>
+    <button class="blue-rounded-button" onclick="saveTableData()">save to localstorage</button>
+    <button class="blue-rounded-button" onclick="loadTableData()">load from localstorage</button> <span id="page-number">get any data</span>
 
     <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
     <script>
@@ -575,12 +579,6 @@
             }
         }
     </script>
-    <button class="blue-rounded-button" onclick="prevPage()">prev page</button>
-    <button class="blue-rounded-button" onclick="insertData(page)">get</button>
-    <button class="blue-rounded-button" onclick="nextPage()">next page</button>
-    <button class="blue-rounded-button" onclick="removeAllChildren(document.getElementById('data-table'))">clear</button>
-    <button class="blue-rounded-button" onclick="saveTableData()">save to localstorage</button>
-    <button class="blue-rounded-button" onclick="loadTableData()">load from localstorage</button> <span id="page-number">get any data</span>
 </body>
 
 </html>
