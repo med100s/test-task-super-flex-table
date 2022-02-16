@@ -40,8 +40,6 @@
 
     <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
     <script>
-        let initialized = false
-
         function makeDraggable() {
 
 
@@ -214,7 +212,7 @@
                     // list.style.border = '1px'
                 list.style.position = 'absolute';
                 list.style.left = `${rect.left}px`;
-                list.style.top = `${rect.top+1}px`;
+                list.style.top = `${rect.top}px`;
                 table.parentNode.insertBefore(list, table);
 
                 // Hide the original table
@@ -475,11 +473,14 @@
                 }
 
                 document.getElementById("data-table").innerHTML += tableData
+                console.log(page / 5)
+                document.getElementById("page-number").innerText = 'you are on page ' + (page / 5 + 1)
                 makeDraggable()
                 createButtons()
                 console.log('hello')
             }).catch(function(error) {
                 console.error(error);
+                document.getElementById("page-number").innerText = 'you are on page ' + (page / 5 + 1) + ' page does not exist'
             });
         }
 
@@ -576,7 +577,7 @@
     <button onclick="nextPage()">next page</button>
     <button onclick="removeAllChildren(document.getElementById('data-table'))">clear</button>
     <button onclick="saveTableData()">save to localstorage</button>
-    <button onclick="loadTableData()">load from localstorage</button>
+    <button onclick="loadTableData()">load from localstorage</button> <span id="page-number">get any data</span>
 </body>
 
 </html>
