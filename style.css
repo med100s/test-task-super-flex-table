@@ -40,7 +40,7 @@ th {
     position: -webkit-sticky;
     position: sticky;
     top: 0;
-    background: #5cb85c;
+    background: #4daabb;
     text-align: left;
     font-weight: normal;
     font-size: 1.1rem;
@@ -126,4 +126,36 @@ tr:nth-child(even) td {
     background: #fff;
     /* border-top: 1px solid #ccc; */
     z-index: 999;
+}
+
+.blue-rounded-button {
+    border-radius: 5px;
+    height: 25px;
+    transition-duration: 0.4s;
+    background-color: white;
+    color: black;
+    border: 2px solid #4daabb;
+    /* Green */
+}
+
+.blue-rounded-button:hover {
+    background-color: #4daabb;
+    /* Green */
+    color: white;
+}
+
+.red-rounded-button {
+    border-radius: 3px;
+    height: 25px;
+    transition-duration: 0.4s;
+    background-color: white;
+    color: black;
+    border: 2px solid #d63c31;
+    /* Green */
+}
+
+.red-rounded-button:hover {
+    background-color: #d63c31;
+    /* Green */
+    color: white;
 }
