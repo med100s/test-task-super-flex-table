@@ -84,7 +84,7 @@ tr:nth-child(even) td {
 
 .clone-list {
     /* border: 1px solid #ccc; */
-    border-top: 0px;
+    /* border-top: 0px; */
     border-collapse: collapse;
 }
 
@@ -99,6 +99,7 @@ tr:nth-child(even) td {
 }
 
 .draggable {
+    border-top: 1px grey;
     cursor: move;
     user-select: none;
 }
@@ -109,15 +110,9 @@ tr:nth-child(even) td {
     height: 38px;
 }
 
-.clone-list {
-    /* border-top: 1px solid #ccc; */
-}
-
-.clone-table {}
-
 .clone-table th {
     border: 1px solid #ccc;
-    border-top: none;
+    /* border-top: none; */
     padding: 0.5rem;
 }
 
