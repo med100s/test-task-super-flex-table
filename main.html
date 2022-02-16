@@ -253,42 +253,8 @@
             };
 
             const mouseDownHandler = function(e) {
-                requestAnimationFrame(() => {
-                        console.log('onMouseMove');
 
-
-                        // Calculate the desired width
-                        horizontalScrollOffset = document.documentElement.scrollLeft;
-                        const width = 10 + 10000 - 12;
-
-                        // Update the column object with the new size value
-                        const column = columns.find(({
-                            header
-                        }) => header === headerBeingResized);
-                        // column.size = Math.max(min, width) + 'px'; // Enforce our minimum
-
-                        // console.log(column)
-
-                        // For the other headers which don't have a set width, fix it to their computed width
-                        columns.forEach(column => {
-                            if (column.size.startsWith('minmax')) { // isn't fixed yet (it would be a pixel value otherwise)
-                                column.size = parseInt(column.header.clientWidth, 10) + 'px';
-                            }
-                        });
-
-                        /* 
-                            Update the column sizes
-                            Reminder: grid-template-columns sets the width for all columns in one value
-                        */
-
-                        table.style.gridTemplateColumns = columns.
-                        map(({
-                            header,
-                            size
-                        }) => size).
-                        join(' ');
-                    })
-                    // Get the original row
+                // Get the original row
                 const originalRow = e.target.parentNode;
                 draggingRowIndex = [].slice.call(table.querySelectorAll('tr')).indexOf(originalRow);
 
@@ -364,6 +330,7 @@
 
             const mouseUpHandler = function() {
                 // Remove the placeholder
+
                 placeholder && placeholder.parentNode.removeChild(placeholder);
 
                 draggingEle.classList.remove('dragging');
@@ -395,7 +362,41 @@
                 document.removeEventListener('mousemove', mouseMoveHandler);
                 document.removeEventListener('mouseup', mouseUpHandler);
             };
+            requestAnimationFrame(() => {
+                console.log('onMouseMove');
 
+
+                // Calculate the desired width
+                horizontalScrollOffset = document.documentElement.scrollLeft;
+                const width = 10 + 10000 - 12;
+
+                // Update the column object with the new size value
+                const column = columns.find(({
+                    header
+                }) => header === headerBeingResized);
+                // column.size = Math.max(min, width) + 'px'; // Enforce our minimum
+
+                // console.log(column)
+
+                // For the other headers which don't have a set width, fix it to their computed width
+                columns.forEach(column => {
+                    if (column.size.startsWith('minmax')) { // isn't fixed yet (it would be a pixel value otherwise)
+                        column.size = parseInt(column.header.clientWidth, 10) + 'px';
+                    }
+                });
+
+                /* 
+                    Update the column sizes
+                    Reminder: grid-template-columns sets the width for all columns in one value
+                */
+
+                table.style.gridTemplateColumns = columns.
+                map(({
+                    header,
+                    size
+                }) => size).
+                join(' ');
+            })
             table.querySelectorAll('tr').forEach(function(row, index) {
                 // Ignore the header
                 // We don't want user to change the order of header
