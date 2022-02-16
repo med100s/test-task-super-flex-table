@@ -432,6 +432,7 @@
                 btn.innerHTML = "delete";
                 btn.type = "submit";
                 btn.name = "formBtn";
+                btn.classList = "red-rounded-button"
                 target = document.getElementById(`delete-button-${i}`)
                 btn.addEventListener('click', () => document.getElementById(`delete-row-${i}`).remove(), true)
                     // btn.onclick = () => document.getElementById(`delete-row-${i}`).remove();
@@ -451,6 +452,7 @@
 
         function prevPage() {
             page -= 5
+            if (page < 0) page += 5
             console.log(page)
             insertData(page)
         }
@@ -480,6 +482,7 @@
                 console.log('hello')
             }).catch(function(error) {
                 console.error(error);
+                prevPage()
                 document.getElementById("page-number").innerText = 'you are on page ' + (page / 5 + 1) + ' page does not exist'
             });
         }
@@ -572,12 +575,12 @@
             }
         }
     </script>
-    <button onclick="prevPage()">prev page</button>
-    <button onclick="insertData(page)">get</button>
-    <button onclick="nextPage()">next page</button>
-    <button onclick="removeAllChildren(document.getElementById('data-table'))">clear</button>
-    <button onclick="saveTableData()">save to localstorage</button>
-    <button onclick="loadTableData()">load from localstorage</button> <span id="page-number">get any data</span>
+    <button class="blue-rounded-button" onclick="prevPage()">prev page</button>
+    <button class="blue-rounded-button" onclick="insertData(page)">get</button>
+    <button class="blue-rounded-button" onclick="nextPage()">next page</button>
+    <button class="blue-rounded-button" onclick="removeAllChildren(document.getElementById('data-table'))">clear</button>
+    <button class="blue-rounded-button" onclick="saveTableData()">save to localstorage</button>
+    <button class="blue-rounded-button" onclick="loadTableData()">load from localstorage</button> <span id="page-number">get any data</span>
 </body>
 
 </html>
